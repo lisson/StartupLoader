@@ -8,6 +8,7 @@ using System.Reactive;
 using ReactiveUI;
 using StartupLoader.Models;
 using System.Collections;
+using System.Windows;
 
 namespace StartupLoader.ViewModels
 {
@@ -15,11 +16,17 @@ namespace StartupLoader.ViewModels
     {
         private Loader loader;
         private ObservableCollection<ApplicationStatus> _apps;
-        
+        public ReactiveCommand CloseCommand { get; }
+
         public LoaderViewModel(Loader _loader)
         {
             loader = _loader;
             _apps = _loader.Completed;
+            //var canClose = loader.WhenAnyValue(x => x.Done);
+            var canClose = loader.WhenAnyValue(x => x.ApplicationCollection.Count, x => x.Completed.Count, (a,b) => b == a);
+            CloseCommand = ReactiveCommand.Create(() => {
+                Application.Current.MainWindow.Close();
+            }, canClose);
             loader.load_programs();
         }
 

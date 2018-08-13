@@ -28,7 +28,7 @@ namespace StartupLoader.Models
         public ObservableCollection<ApplicationStatus> Completed
         {
             get { return _completed; }
-            set { Console.Out.WriteLine("ArrayList Set");  this.RaiseAndSetIfChanged(ref _completed, value); }
+            set { this.RaiseAndSetIfChanged(ref _completed, value); }
         }
 
         public Loader()
