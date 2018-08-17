@@ -27,6 +27,15 @@ namespace StartupLoader
             InitializeComponent();
             DataContext = new LoaderViewModel(new Loader());
             Loaded += ToolWindow_Loaded;
+            this.Closing += this.MainWindow_Closing;
+        }
+
+        void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (btn_close.IsEnabled == false)
+            {
+                e.Cancel = true;
+            }
         }
 
         // Prep stuff needed to remove close button on window

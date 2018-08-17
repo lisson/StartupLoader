@@ -7,7 +7,6 @@
         Title="System Configuration" Height="350" Width="525" ResizeMode="NoResize" Background="LightGray"
         WindowStartupLocation="CenterScreen"
 >
-
     <Grid Background="White">
         <ListBox ItemsSource="{Binding Apps}" Margin="0,0,0.429,28.143">
             <ListBox.ItemTemplate>
@@ -39,6 +38,6 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button Content="Close" Command="{Binding CloseCommand}" HorizontalAlignment="Left" Margin="216,291,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Name="btn_close" Content="Close" Command="{Binding CloseCommand}" HorizontalAlignment="Left" Margin="216,291,0,0" VerticalAlignment="Top" Width="75"/>
     </Grid>
 </Window>
