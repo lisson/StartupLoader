@@ -19,6 +19,7 @@ namespace StartupLoader.Models
         private ObservableCollection<ApplicationStatus> _completed;
         private Queue processes_queue;
         private Logger logger;
+        private RegistryManager RegMan;
 
         public AppSettingsCollection ApplicationCollection
         {
@@ -39,6 +40,7 @@ namespace StartupLoader.Models
             processes_queue = new Queue();
             _completed = new ObservableCollection<ApplicationStatus>();
             logger = NLog.LogManager.GetCurrentClassLogger();
+            RegMan = new RegistryManager(@"SOFTWARE");
             logger.Debug("Loader init complete.");
         }
 
@@ -53,6 +55,11 @@ namespace StartupLoader.Models
                 logger.Debug(s.path + " " + s.arguments);
             }
             load_p();
+        }
+
+        private void Cleanup()
+        {
+            RegMan.Cleanup();
         }
 
         private void load_p()
@@ -82,6 +89,7 @@ namespace StartupLoader.Models
                             if (temp != null)
                             {
                                 temp.State = state.SUCCESS;
+                                RegMan.WriteValue(temp.Label, "DONE");
                             }
                         });
                         logger.Debug(s.path + " " + s.arguments + " completed.");
@@ -92,13 +100,21 @@ namespace StartupLoader.Models
                         App.Current.Dispatcher.Invoke((Action)delegate
                         {
                             ps1.State = state.FAILED;
+                            RegMan.WriteValue(ps1.Label, "DONE");
                         });
                         logger.Debug(s.path + " " + s.arguments + " exited with status " + process.ExitCode);
+                        Cleanup();
                     }
                 };
                 logger.Debug("Starting " + s.path + " " + s.arguments);
                 ps1.State = state.RUNNING;
                 process.Start();
+                RegMan.WriteValue(s.label, "RUNNING");
+            }
+            else
+            {
+                logger.Debug("StartupLoader finished loading all applications.");
+                Cleanup();
             }
         }
     }
