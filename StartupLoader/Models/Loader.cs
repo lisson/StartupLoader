@@ -20,6 +20,14 @@ namespace StartupLoader.Models
         private Queue processes_queue;
         private Logger logger;
         private RegistryManager RegMan;
+        private bool continue_on_error;
+        private bool _done;
+
+        public bool Done
+        {
+            get { return _done; }
+            set { this.RaiseAndSetIfChanged(ref _done, value); }
+        }
 
         public AppSettingsCollection ApplicationCollection
         {
@@ -36,6 +44,7 @@ namespace StartupLoader.Models
         {
             // Load config
             AppSettingsSection section = (AppSettingsSection)ConfigurationManager.GetSection("Section");
+            continue_on_error = ConfigurationManager.AppSettings["continue_on_error"] == "1";
             _apps = (AppSettingsCollection)section.Applications;
             processes_queue = new Queue();
             _completed = new ObservableCollection<ApplicationStatus>();
@@ -47,12 +56,22 @@ namespace StartupLoader.Models
         public void load_programs()
         {
             logger.Debug("List of applications to be loaded:");
+            String t;
             foreach (AppSetting s in _apps)
             {
                 // I can't seem to remove items from ConfigurationElementCollection
                 // So I pushed them all to a queue first
-                processes_queue.Enqueue(s);
-                logger.Debug(s.path + " " + s.arguments);
+                t = RegMan.GetValue(s.label);
+                if (t != null && t.CompareTo("DONE") == 0)
+                {
+                    logger.Debug($"Skipping {s.path} because found in registry.");
+                    _completed.Add(new ApplicationStatus(s.label, s.path));
+                }
+                else
+                {
+                    processes_queue.Enqueue(s);
+                    logger.Debug($"Queueing {s.path} {s.arguments}");
+                }
             }
             load_p();
         }
@@ -99,11 +118,22 @@ namespace StartupLoader.Models
                     {
                         App.Current.Dispatcher.Invoke((Action)delegate
                         {
-                            ps1.State = state.FAILED;
-                            RegMan.WriteValue(ps1.Label, "DONE");
+                            _completed.Last().State = state.FAILED;
+                            RegMan.WriteValue(_completed.Last().Label, "DONE");
                         });
                         logger.Debug(s.path + " " + s.arguments + " exited with status " + process.ExitCode);
-                        Cleanup();
+                        if (continue_on_error)
+                        {
+                            load_p();
+                        }
+                        else
+                        {
+                            App.Current.Dispatcher.Invoke((Action)delegate
+                            {
+                                Done = true;
+                            });
+                            Cleanup();
+                        }
                     }
                 };
                 logger.Debug("Starting " + s.path + " " + s.arguments);

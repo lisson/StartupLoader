@@ -23,7 +23,7 @@ namespace StartupLoader.ViewModels
             loader = _loader;
             _apps = _loader.Completed;
             //var canClose = loader.WhenAnyValue(x => x.Done);
-            var canClose = loader.WhenAnyValue(x => x.ApplicationCollection.Count, x => x.Completed.Count, (a,b) => b == a);
+            var canClose = loader.WhenAnyValue(x => x.ApplicationCollection.Count, x => x.Completed.Count, x=>x.Done, (a, b, c) => (b == a) || c);
             CloseCommand = ReactiveCommand.Create(() => {
                 Application.Current.MainWindow.Close();
             }, canClose);

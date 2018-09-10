@@ -29,6 +29,7 @@ namespace StartupLoader.Models
             {
                 rkHKLM = Registry.CurrentUser;
             }
+            rkHKLM.OpenSubKey(SubTree);
         }
 
         public bool WriteValue(string key, string val)
@@ -41,6 +42,10 @@ namespace StartupLoader.Models
         public string GetValue(string key)
         {
             RegistryKey k = rkHKLM.OpenSubKey(SubTree);
+            if (k == null)
+            {
+                return "";
+            }
             return (string)k.GetValue(key);
         }
 
