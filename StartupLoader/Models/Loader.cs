@@ -10,6 +10,7 @@ using ReactiveUI;
 using System.Configuration;
 using System.Collections.Specialized;
 using NLog;
+using System.Windows;
 
 namespace StartupLoader.Models
 {
@@ -50,6 +51,7 @@ namespace StartupLoader.Models
             _completed = new ObservableCollection<ApplicationStatus>();
             logger = NLog.LogManager.GetCurrentClassLogger();
             RegMan = new RegistryManager(@"SOFTWARE");
+            logger.Debug(System.Reflection.Assembly.GetEntryAssembly().Location);
             logger.Debug("Loader init complete.");
         }
 
@@ -102,9 +104,9 @@ namespace StartupLoader.Models
                     if (process.ExitCode == 0)
                     {
                         Console.Out.WriteLine("Completed " + s.path);
+                        ApplicationStatus temp = _completed.FirstOrDefault(x => x.Name == ps1.Name);
                         App.Current.Dispatcher.Invoke((Action)delegate
                         {
-                            ApplicationStatus temp = _completed.FirstOrDefault(x => x.Name == ps1.Name);
                             if (temp != null)
                             {
                                 temp.State = state.SUCCESS;
@@ -112,7 +114,20 @@ namespace StartupLoader.Models
                             }
                         });
                         logger.Debug(s.path + " " + s.arguments + " completed.");
-                        load_p();
+                        if (s.restart.CompareTo("1") == 0)
+                        {
+                            logger.Debug("Preparing to restart.");
+                            //Add to run_once, exit, restart
+                            RegMan.SetRunOnce(System.Reflection.Assembly.GetEntryAssembly().Location);
+                            App.Current.Dispatcher.Invoke((Action)delegate
+                            {
+                                Application.Current.Shutdown();
+                            });
+                        }
+                        else
+                        {
+                            load_p();
+                        }
                     }
                     else
                     {

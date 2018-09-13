@@ -49,6 +49,12 @@ namespace StartupLoader.Models
             return (string)k.GetValue(key);
         }
 
+        public void SetRunOnce(string val)
+        {
+            RegistryKey k = rkHKLM.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\RunOnce");
+            k.SetValue("StartupLoader", val);
+        }
+
         public void Cleanup()
         {
             RegistryKey r = rkHKLM.CreateSubKey(RegRoot);

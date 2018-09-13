@@ -34,6 +34,13 @@ namespace StartupLoader
             get { return (String)this["label"]; }
             set { }
         }
+
+        [ConfigurationProperty("restart", DefaultValue = "0", IsRequired =false)]
+        public String restart
+        {
+            get { return (String)this["restart"]; }
+            set { }
+        }
     }
 
     class AppSettingsSection : ConfigurationSection
