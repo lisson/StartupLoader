@@ -6,9 +6,10 @@
         mc:Ignorable="d"
         Title="System Configuration" Height="350" Width="525" ResizeMode="NoResize" Background="LightGray"
         WindowStartupLocation="CenterScreen"
+        Topmost="True"
 >
     <Grid Background="White">
-        <ListBox ItemsSource="{Binding Apps}" Margin="0,0,0.429,28.143">
+        <ListBox ItemsSource="{Binding Apps}" Margin="0,0,0.429,33.143">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Margin="0,2">
@@ -38,6 +39,6 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button Name="btn_close" Content="Close" Command="{Binding CloseCommand}" HorizontalAlignment="Left" Margin="216,291,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Name="btn_close" Content="Close" Command="{Binding CloseCommand}" HorizontalAlignment="Left" Margin="219,0,0,7.143" VerticalAlignment="Bottom" Width="75"/>
     </Grid>
 </Window>

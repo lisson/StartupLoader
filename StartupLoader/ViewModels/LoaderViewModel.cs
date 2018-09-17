@@ -27,6 +27,10 @@ namespace StartupLoader.ViewModels
             CloseCommand = ReactiveCommand.Create(() => {
                 Application.Current.MainWindow.Close();
             }, canClose);
+        }
+
+        public void Load()
+        {
             loader.load_programs();
         }
 

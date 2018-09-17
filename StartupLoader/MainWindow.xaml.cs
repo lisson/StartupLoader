@@ -14,6 +14,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using StartupLoader.Models;
 using StartupLoader.ViewModels;
+using System.Threading;
+using NLog;
+
 
 namespace StartupLoader
 {
@@ -22,11 +25,19 @@ namespace StartupLoader
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static Mutex mutex;
+        private static string appGuid = "70a603d1-7737-4f7f-ad18-8face3092c26";
+        private LoaderViewModel lm;
+
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new LoaderViewModel(new Loader());
+            string mutex_id = @"Global\" + appGuid;
+            mutex = new Mutex(false, mutex_id);
+            lm = new LoaderViewModel(new Loader());
+            DataContext = lm;
             Loaded += ToolWindow_Loaded;
+            Loaded += CheckMutex;
             this.Closing += this.MainWindow_Closing;
         }
 
@@ -51,6 +62,18 @@ namespace StartupLoader
             // Code to remove close box from window
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_SYSMENU);
+        }
+
+        private void CheckMutex(object sender, RoutedEventArgs e)
+        {
+            if (!mutex.WaitOne(0, false))
+            {
+                Application.Current.Shutdown();
+            }
+            else
+            {
+                lm.Load();
+            }
         }
     }
 }
